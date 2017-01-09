@@ -24,7 +24,7 @@ define([], function () {
             layout.invalidate();
         })
         .after(500, function () {
-            frame.model().title = '<h2 style="visibility:visible">Log Replication</h1>'
+            frame.model().title = '<h2 style="visibility:visible">Log Replication 日志复制</h1>'
                                 + '<br/>' + frame.model().controls.html();
             layout.invalidate();
         })
@@ -53,15 +53,15 @@ define([], function () {
         // Overview
         //------------------------------
         .then(function () {
-            subtitle('<h2>Once we have a leader elected we need to replicate all changes to our system to all nodes.</h2>', false);
+            subtitle('<h2>一旦我们选出leader，我们需要将系统的更改复制到所有节点。</h2>', false);
         })
         .then(wait).indefinite()
         .then(function () {
-            subtitle('<h2>This is done by using the same <em>Append Entries</em> message that was used for heartbeats.</h2>', false);
+            subtitle('<h2>通过将相同的附加条目用于心跳消息，可以将系统的更改复制到所有节点。</h2>', false);
         })
         .then(wait).indefinite()
         .then(function () {
-            subtitle('<h2>Let\'s walk through the process.</h2>', false);
+            subtitle('<h2>我们来看一下这个过程</h2>', false);
         })
         .then(wait).indefinite()
 
@@ -71,36 +71,36 @@ define([], function () {
         //------------------------------
         .then(function () {
             model().clients.create("X");
-            subtitle('<h2>First a client sends a change to the leader.</h2>', false);
+            subtitle('<h2>首先 client 给 leader 发送一个改变.</h2>', false);
         })
         .then(wait).indefinite()
         .then(function () {
             client("X").send(model().leader(), "SET 5");
         })
         .after(model().defaultNetworkLatency, function() {
-            subtitle('<h2>The change is appended to the leader\'s log...</h2>');
+            subtitle('<h2>这次改变附加到 leader\'s log...</h2>');
         })
         .at(model(), "appendEntriesRequestsSent", function () {})
         .after(model().defaultNetworkLatency * 0.25, function(event) {
-            subtitle('<h2>...then the change is sent to the followers on the next heartbeat.</h2>');
+            subtitle('<h2>...然后在接下来的心跳，这些更改发送给followers。</h2>');
         })
         .after(1, clear)
         .at(model(), "commitIndexChange", function (event) {
             if(event.target === model().leader()) {
-                subtitle('<h2>An entry is committed once a majority of followers acknowledge it...</h2>');
+                subtitle('<h2>一旦大部分追随者告知已收到这个条目，那么就将这个条目提交...</h2>');
             }
         })
         .after(model().defaultNetworkLatency * 0.25, function(event) {
-            subtitle('<h2>...and a response is sent to the client.</h2>');
+            subtitle('<h2>...然后给 client 发送一个答复.</h2>');
         })
         .after(1, clear)
         .after(model().defaultNetworkLatency, function(event) {
-            subtitle('<h2>Now let\'s send a command to increment the value by "2".</h2>');
+            subtitle('<h2>现在，我们发送一个命令，把这个值 增加 "2".</h2>');
             client("X").send(model().leader(), "ADD 2");
         })
         .after(1, clear)
         .at(model(), "recv", function (event) {
-            subtitle('<h2>Our system value is now updated to "7".</h2>', false);
+            subtitle('<h2>现在，我们系统的值增加到 "7".</h2>', false);
         })
         .after(1, wait).indefinite()
 
@@ -128,11 +128,11 @@ define([], function () {
             node("B").state("leader");
         })
         .after(1, function () {
-            subtitle('<h2>Raft can even stay consistent in the face of network partitions.</h2>', false);
+            subtitle('<h2>Raft 甚至可以在网络分区保持一致</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
-            subtitle('<h2>Let\'s add a partition to separate A & B from C, D & E.</h2>', false);
+            subtitle('<h2>我们添加一个分区把 A & B 和 C, D & E 分开.</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
@@ -151,35 +151,35 @@ define([], function () {
             return (event.target.state() === "leader");
         })
         .after(1, function () {
-            subtitle('<h2>Because of our partition we now have two leaders in different terms.</h2>', false);
+            subtitle('<h2>由于分区，我们现在有两个 leaders 分别在两个分区.</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
             model().clients.create("Y");
-            subtitle('<h2>Let\'s add another client and try to update both leaders.</h2>', false);
+            subtitle('<h2>我们再增加一个 client 去更新两个 leaders.</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
             client("Y").send(node("B"), "SET 3");
-            subtitle('<h2>One client will try to set the value of node B to "3".</h2>', false);
+            subtitle('<h2>One client 想要将 node B 的值置为 "3".</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
-            subtitle('<h2>Node B cannot replicate to a majority so its log entry stays uncommitted.</h2>', false);
+            subtitle('<h2>Node B 不能将这条日志复制给多数node，所以这条日志的状态一直是未提交。</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
             var leader = model().leader(["C", "D", "E"]);
             client("X").send(leader, "SET 8");
-            subtitle('<h2>The other client will try to set the value of node ' + leader.id + ' to "8".</h2>', false);
+            subtitle('<h2>另一个 client 想要将 node ' + leader.id + ' 的值置为 "8".</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
-            subtitle('<h2>This will succeed because it can replicate to a majority.</h2>', false);
+            subtitle('<h2>这将成功，因为可以将这条日志复制给多数node </h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
-            subtitle('<h2>Now let\'s heal the network partition.</h2>', false);
+            subtitle('<h2>现在，让我们改变网络分区。</h2>', false);
         })
         .after(1, wait).indefinite()
         .after(1, function () {
@@ -193,14 +193,14 @@ define([], function () {
             return (event.target.id === "B" && event.target.state() === "follower");
         })
         .after(1, function () {
-            subtitle('<h2>Node B will see the higher election term and step down.</h2>');
+            subtitle('<h2>Node B 会看到更高的选举任期并下台。</h2>');
         })
         .after(1, function () {
-            subtitle('<h2>Both nodes A & B will roll back their uncommitted entries and match the new leader\'s log.</h2>');
+            subtitle('<h2>nodes A & B 都会回滚它们未提交的条目来匹配new leader\'s log.</h2>');
         })
         .after(1, wait).indefinite()
         .after(1, function () {
-            subtitle('<h2>Our log is now consistent across our cluster.</h2>', false);
+            subtitle('<h2>现在，在我们的集群中的日志是一致的。</h2>', false);
         })
         .after(1, wait).indefinite()
 
